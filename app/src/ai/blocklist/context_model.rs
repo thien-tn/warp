@@ -358,13 +358,16 @@ impl BlocklistAIContextModel {
     }
 
     /// Returns `true` if the next AI query has any context that should force the input to be
-    /// locked in AI mode (skipping NLD): a pending image or file attachment, or a pending block.
+    /// locked in AI mode (skipping NLD): a pending image or file attachment, a pending block,
+    /// or an auto-attached Agent View block.
     ///
     /// Pending selected text is intentionally excluded because users can select shell command
     /// text (e.g. to copy a previously-run command), and that should not lock the input to AI
     /// mode.
     pub fn has_locking_attachment(&self) -> bool {
-        !self.pending_context_block_ids.is_empty() || !self.pending_attachments.is_empty()
+        !self.pending_context_block_ids.is_empty()
+            || !self.pending_attachments.is_empty()
+            || !self.auto_attached_agent_view_user_block_ids.is_empty()
     }
 
     /// Returns the set `BlockId`s corresponding to blocks to be included as context with the next
@@ -1045,6 +1048,13 @@ impl BlocklistAIContextModel {
 
     pub(crate) fn insert_pending_block_id_for_test(&mut self, block_id: BlockId) {
         self.pending_context_block_ids.insert(block_id);
+    }
+
+    pub(crate) fn push_auto_attached_agent_view_user_block_id_for_test(
+        &mut self,
+        block_id: BlockId,
+    ) {
+        self.auto_attached_agent_view_user_block_ids.push(block_id);
     }
 
     pub(crate) fn set_pending_selected_text_for_test(&mut self, text: Option<String>) {

@@ -96,6 +96,22 @@ fn has_locking_attachment_is_true_with_pending_block_id() {
 }
 
 #[test]
+fn has_locking_attachment_is_true_with_auto_attached_agent_view_block_id() {
+    App::test((), |mut app| async move {
+        let model = build_test_context_model(&mut app);
+
+        model.update(&mut app, |m, _| {
+            m.push_auto_attached_agent_view_user_block_id_for_test(BlockId::new());
+        });
+
+        model.read(&app, |m, _| {
+            assert!(m.pending_context_block_ids().is_empty());
+            assert!(m.has_locking_attachment());
+        });
+    });
+}
+
+#[test]
 fn has_locking_attachment_is_false_with_only_pending_selected_text() {
     // Selected text alone is *not* a locking attachment: the user could be selecting shell
     // command text (e.g. to copy a previously-run command), and forcing the input into AI
